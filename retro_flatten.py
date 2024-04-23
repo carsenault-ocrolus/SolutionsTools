@@ -73,24 +73,16 @@ def flatten_book_summary(df,out_dir):
 ##    flatten_cash_flow
 #####
 def flatten_cash_flow(df,out_dir):
-    df = df[df['file']=='cash_flow_features.json']
+    df = df[df.file == 'cash_flow_features.json']
     cffList= list()
 
-    masterDF = pd.DataFrame()
     for index, row in df.iterrows():
-        rowDict={}
         with open(row.directory + '/' + row.file, 'r') as et:
             et_json = json.load(et)
         try:
-            rowDict['book_name'] = row.application_name
-            gen = [(k,v) for (k, v) in et_json.items() if type(v) not in [dict, list]]
-            for k,v in gen:
-                rowDict[k] = v
-
-            y = et_json['cash_flow_features']
-            if y is not None:
-                for x in y:
-                    rowDict[x]=y.get(x)
+            rowDict = {'book_name': row.application_name}
+            rowDict.update({key:value for key, value in et_json.items() if type(value) not in [list, dict]})
+            rowDict.update({key:value for key,value in et_json['cash_flow_features'].items()})
             cffList.append(rowDict)
         except Exception as e:
             print(f'BOOK: [{row.application_name}] {e}')
@@ -99,7 +91,6 @@ def flatten_cash_flow(df,out_dir):
     masterDF = pd.DataFrame.from_records(cffList)
     masterDF.drop('error_messages',axis=1,inplace=True)
     masterDF.to_csv(out_dir + '/cash_flow_features.csv',index=False)
-
 
 #####
 ##    flatten_enriched_txns
