@@ -82,9 +82,10 @@ def flatten_cash_flow(df,out_dir):
         with open(row.directory + '/' + row.file, 'r') as et:
             et_json = json.load(et)
         try:
-            for x in ['book_uuid','book_start_month','book_end_month','num_of_months']:
-                rowDict[x]=et_json[x]
             rowDict['book_name'] = row.application_name
+            gen = [(k,v) for (k, v) in et_json.items() if type(v) not in [dict, list]]
+            for k,v in gen:
+                rowDict[k] = v
 
             y = et_json['cash_flow_features']
             if y is not None:
@@ -92,11 +93,12 @@ def flatten_cash_flow(df,out_dir):
                     rowDict[x]=y.get(x)
             cffList.append(rowDict)
         except Exception as e:
-            print('f')
+            print(f'BOOK: [{row.application_name}] {e}')
+            print(f'BOOK: [{row.application_name}] {json.dumps(et_json)}')
 
     masterDF = pd.DataFrame.from_records(cffList)
     masterDF.drop('error_messages',axis=1,inplace=True)
-    masterDF.to_csv(out_dir + '/cash_flow_summary.csv',index=False)
+    masterDF.to_csv(out_dir + '/cash_flow_features.csv',index=False)
 
 
 #####
