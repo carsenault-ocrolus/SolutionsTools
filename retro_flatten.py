@@ -98,9 +98,7 @@ def flatten_cash_flow(df,out_dir):
 def flatten_enriched_txns(df,out_dir):
     df = df[df['file']=='enrichedTxns.json']
     txnList = list()
-    masterDF = pd.DataFrame()
     for index, row in df.iterrows():
-        rowDict = {}
         try:
             with open(row.directory + '/' + row.file, 'r') as et:
                 et_json = json.load(et)
